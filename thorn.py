@@ -45,27 +45,43 @@ if __name__ == '__main__':
 
 cacti_url = URL
 
+proxy_url = 'http://127.0.0.1:8080' 
 # HTTP setup
-http = urllib3.PoolManager(
-    cert_reqs='CERT_REQUIRED',
-    ca_certs=certifi.where()
-)
+# http = urllib3.ProxyManager(
+#     proxy_url, 
+#     cert_reqs=ssl.CERT_NONE, 
+#     assert_hostname=False
+# )
+http = urllib3.ProxyManager(proxy_url)
 
-http_proxy = {'127.0.0.1': 8080}
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 session = http.request('GET', cacti_url)
 
-def check_cacti_version(session):
-    print('[+] Checking cacti version')
-    resp = session.data()
+def payload():
+    print('[*] Attempting to upload payload')
+    
+    
+    pass
 
-    if 'Cacti CHANGELOG' in resp and '1.2.26' not in r:
-        print('[+] Valid version!')
-    else:
-        print('[-] Invalid version, not going to work..')
+def check_cacti_version(session):
+    print('[*] Checking cacti version')
+    try:
+        resp = session.data()
+        print(f"Status: {resp.status}")
+    
+        if 'Cacti CHANGELOG' in resp and '1.2.26' not in r:
+            print('[+] Valid version!')
+        else:
+            print('[-] Invalid version, not going to work..')
+   
+    except urllib3.exceptions.ProxyError as e:
+        print(f"Proxy Error: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def auth_login():
-    print('[+] Valid version, attempting login')
+    print('[*] Version seems to be valid, proceeding to login')
     auth = urllib.request.HTTPBasicAuthHandler()
     auth.add_password(
         realm='Cacti',
@@ -80,19 +96,18 @@ def auth_login():
         print(f.read().decode('utf-8'))
 
 
-def payload():
-    pass
 
-# check = check_cacti_version(cacti_url + "/CHANGELOG")
 
-# if check == False:
-#     sys.exit(0)
+check = check_cacti_version(cacti_url + "/CHANGELOG")
+
+if check == False:
+    sys.exit(0)
     
-# if session.status == 404:
-#     print('[#] Not found')    
-#     sys.exit(0)
-# else:
-#     check_cacti_version(version_check)
+if session.status == 404:
+    print('[#] Not found')    
+    sys.exit(0)
+else:
+    check_cacti_version(session)
     
 
 # print('[*] Uploading payload')
